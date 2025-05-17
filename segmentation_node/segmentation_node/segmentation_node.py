@@ -61,6 +61,7 @@ class SegmentationNode(Node):
         self.publisher.publish(segmented_image_msg)
 
 
+
     def preprocess(self, frame):
         # 前処理
         frame = cv2.resize(frame, (320, 320))
@@ -97,10 +98,13 @@ class SegmentationNode(Node):
             [0, 192, 0],        # クラス18: ライトグリーン
             [128, 192, 0],      # クラス19: ライトオレンジ
             [0, 64, 128],       # クラス20: ダークブルー
-        ])
+        ], dtype='uint8')
 
         # セグメンテーションマップをカラーマップに変換
         color_mask = color_map[segmentation_map]
+
+        # ここで dtype を明示的に uint8 にする
+        color_mask = color_mask.astype('uint8')
         return color_mask
 
 
