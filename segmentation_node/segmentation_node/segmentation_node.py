@@ -5,6 +5,8 @@ from std_msgs.msg import String
 from cv_bridge import CvBridge
 import cv2
 import torch
+
+import numpy as np
 from torchvision.models.segmentation import lraspp_mobilenet_v3_large, fcn_resnet50
 
 class SegmentationNode(Node):
@@ -54,9 +56,10 @@ class SegmentationNode(Node):
         # セグメンテーションマップの後処理
         segmentation_map = self.postprocess(output)
 
-        # ROS2で送信
-        segmented_image_msg = self.bridge.cv2_to_imgmsg(segmentation_map, "mono8")
+        # ROS2で送信（カラーで送信）
+        segmented_image_msg = self.bridge.cv2_to_imgmsg(segmentation_map, "bgr8")
         self.publisher.publish(segmented_image_msg)
+
 
     def preprocess(self, frame):
         # 前処理
@@ -70,7 +73,36 @@ class SegmentationNode(Node):
     def postprocess(self, output):
         # 出力マップを単一チャンネルに変換
         segmentation_map = output['out'].argmax(dim=1).squeeze().cpu().numpy().astype('uint8')
-        return segmentation_map
+
+        # カラーマップの作成 (例: 21クラス対応)
+        color_map = np.array([
+            [0, 0, 0],          # クラス0: 黒 (背景)
+            [128, 0, 0],        # クラス1: 赤
+            [0, 128, 0],        # クラス2: 緑
+            [128, 128, 0],      # クラス3: 黄
+            [0, 0, 128],        # クラス4: 青
+            [128, 0, 128],      # クラス5: 紫
+            [0, 128, 128],      # クラス6: 水色
+            [128, 128, 128],    # クラス7: 灰色
+            [64, 0, 0],         # クラス8: 暗い赤
+            [192, 0, 0],        # クラス9: 明るい赤
+            [64, 128, 0],       # クラス10: 暗い緑
+            [192, 128, 0],      # クラス11: 明るい緑
+            [64, 0, 128],       # クラス12: 暗い青
+            [192, 0, 128],      # クラス13: 明るい青
+            [64, 128, 128],     # クラス14: 暗い水色
+            [192, 128, 128],    # クラス15: 明るい水色
+            [0, 64, 0],         # クラス16: ダークグリーン
+            [128, 64, 0],       # クラス17: ダークオレンジ
+            [0, 192, 0],        # クラス18: ライトグリーン
+            [128, 192, 0],      # クラス19: ライトオレンジ
+            [0, 64, 128],       # クラス20: ダークブルー
+        ])
+
+        # セグメンテーションマップをカラーマップに変換
+        color_mask = color_map[segmentation_map]
+        return color_mask
+
 
 def main(args=None):
     rclpy.init(args=args)
