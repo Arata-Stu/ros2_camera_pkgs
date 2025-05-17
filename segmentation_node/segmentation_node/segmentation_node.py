@@ -11,15 +11,19 @@ class SegmentationNode(Node):
     def __init__(self):
         super().__init__('segmentation_node')
 
+        # CUDA対応の確認
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.get_logger().info(f"Using device: {self.device}")
+
         # パラメータの宣言と取得
         self.declare_parameter('model_type', 'lraspp')
         self.model_type = self.get_parameter('model_type').get_parameter_value().string_value
 
         # モデルの選択
         if self.model_type == 'lraspp':
-            self.model = lraspp_mobilenet_v3_large(pretrained=True)
+            self.model = lraspp_mobilenet_v3_large(pretrained=True).to(self.device)
         elif self.model_type == 'fastscnn':
-            self.model = fcn_resnet50(pretrained=True)
+            self.model = fcn_resnet50(pretrained=True).to(self.device)
         else:
             self.get_logger().error("Invalid model type. Choose 'lraspp' or 'fastscnn'.")
             return
@@ -59,6 +63,8 @@ class SegmentationNode(Node):
         frame = cv2.resize(frame, (320, 320))
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         tensor = torch.from_numpy(frame).float().permute(2, 0, 1).unsqueeze(0) / 255.0
+        # GPUに転送
+        tensor = tensor.to(self.device)
         return tensor
 
     def postprocess(self, output):
