@@ -9,11 +9,11 @@ setup(
     version='0.0.1',
     packages=[package_name],
     data_files=[
-        ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
-         # launch/config フォルダを含める
-        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+        
+        # package.xml をインストール
+        (os.path.join('share', package_name), ['package.xml']),
+        # launch/config フォルダを含める
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.xml')),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
     ],
     install_requires=['setuptools'],
