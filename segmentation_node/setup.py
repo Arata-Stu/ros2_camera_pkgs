@@ -1,38 +1,27 @@
-from setuptools import setup, find_packages
-import os
-from glob import glob
+from setuptools import setup
 
 package_name = 'segmentation_node'
 
 setup(
     name=package_name,
-    version='0.1.0',
-    packages=find_packages(exclude=['test']),
+    version='0.0.1',
+    packages=[package_name],
     data_files=[
-        # ament index 用
         ('share/ament_index/resource_index/packages',
-            [os.path.join('resource', package_name)]),
-        # package.xml をインストール
-        (os.path.join('share', package_name), ['package.xml']),
-        # launch/config フォルダを含める
-        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
-        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/launch', ['launch/segmentation_node_launch.py']),
     ],
-    install_requires=[
-        'setuptools',
-        'torch',
-        'torchvision',
-        'torch-geometric',
-    ],
+    install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Your Name',
-    maintainer_email='your_email@example.com',
-    description='segmentation_node node for processing Camera data',
+    maintainer='jetson',
+    maintainer_email='jetson@todo.todo',
+    description='Segmentation Node for ROS2 using MobileNetV3 and FastSCNN',
     license='Apache-2.0',
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            # 実行可能スクリプトを定義
-            'segmentation_node = segmentation_node.segmentation_node:main',
+            'segmentation_node = segmentation_node.segmentation_node:main'
         ],
     },
 )

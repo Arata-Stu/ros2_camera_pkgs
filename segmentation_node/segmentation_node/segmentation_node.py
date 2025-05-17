@@ -11,9 +11,9 @@ class SegmentationNode(Node):
     def __init__(self):
         super().__init__('segmentation_node')
 
-        # パラメータの宣言
+        # パラメータの宣言と取得
         self.declare_parameter('model_type', 'lraspp')
-        self.model_type = self.get_parameter('model_type').value
+        self.model_type = self.get_parameter('model_type').get_parameter_value().string_value
 
         # モデルの選択
         if self.model_type == 'lraspp':
@@ -75,4 +75,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-    
